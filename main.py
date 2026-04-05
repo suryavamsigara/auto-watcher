@@ -4,9 +4,7 @@ import os
 from playwright.async_api import async_playwright, TimeoutError as PlaywrightTimeoutError
 from helpers import parse_duration_and_wait, play_video
 
-# ================= CONFIGURATION =================
 BROWSER_PROFILE_DIR = os.path.join(os.getcwd(), "browser_profiles", "default")
-# =================================================
 
 async def main():
     print("🚀 Starting Auto-Watcher...")
@@ -107,52 +105,75 @@ async def main():
             await page.wait_for_timeout(2000)
 
         # =================================================
-        # STEP 3: STRICTLY target "Learning Contents"
+        # STEP 3: Process Video Sections Dynamically
         # =================================================
-        lc_section = current_mod.locator("div.submod").filter(has_text=re.compile(r"Learning Contents", re.IGNORECASE)).first
-        
-        if await lc_section.count() == 0:
-            print("   No 'Learning Contents' section found. Skipping module...")
-            # Collapse the main module to keep DOM clean
-            main_up_arrow = current_mod.locator("div.accordHeadright").first.locator("img[alt='up-arrow']")
-            if await main_up_arrow.count() > 0:
-                await main_up_arrow.click(force=True)
-                await page.wait_for_timeout(500)
-            continue
-            
-        # Expand "Learning Contents" if it has a down-arrow
-        lc_arrow = lc_section.locator("div.accordHeadright img[alt='down-arrow']")
-        if await lc_arrow.count() > 0:
-            await lc_arrow.click(force=True)
-            await page.wait_for_timeout(1000)
+        target_headers = current_mod.locator("div.accordHeadright").filter(has_text=re.compile(r"Learning Content|Reference Video|Learning Video", re.IGNORECASE))
+        header_count = await target_headers.count()
 
-        # =================================================
-        # STEP 4: Iterate Through Videos (Only in Learning Contents)
-        # =================================================
-        # Look for video rows strictly inside our lc_section
-        topics = lc_section.locator(".accEach1")
-        topic_count = await topics.count()
-        
-        if topic_count == 0:
-            print("   No video topics found in 'Learning Contents'. Moving to next module...")
+        if header_count > 0:
+            for h in range(header_count):
+                # Re-query the header to prevent stale element references
+                header = current_mod.locator("div.accordHeadright").filter(has_text=re.compile(r"Learning Content|Reference Video", re.IGNORECASE)).nth(h)
+                
+                section_title = await header.inner_text()
+                print(f"\n   📂 Processing section: {section_title.strip()}")
+                
+                # Expand section if it has a down-arrow
+                arrow = header.locator("img[alt='down-arrow']")
+                if await arrow.count() > 0:
+                    await arrow.click(force=True)
+                    await page.wait_for_timeout(1000)
+                
+                # Scope strictly to this section's wrapper to avoid clicking hidden videos elsewhere
+                section_wrapper = header.locator("xpath=ancestor::div[contains(@class, 'submod')][1]")
+                
+                topics = section_wrapper.locator(".accEach1")
+                topic_count = await topics.count()
+                
+                if topic_count == 0:
+                    print(f"      No videos found in {section_title.strip()}.")
+                else:
+                    for t in range(topic_count):
+                        # Re-query topic dynamically to avoid stale elements
+                        current_topic = current_mod.locator("div.accordHeadright").filter(has_text=re.compile(r"Learning Content|Reference Video|Learning Video", re.IGNORECASE)).nth(h).locator("xpath=ancestor::div[contains(@class, 'submod')][1]").locator(".accEach1").nth(t)
+                        
+                        await current_topic.scroll_into_view_if_needed()
+                        topic_text = await current_topic.inner_text()
+                        clean_title = topic_text.replace("\n", " - ").strip()
+                        
+                        print(f"\n      📺 Opening Topic {t+1}/{topic_count}: {clean_title}")
+                        
+                        await current_topic.click(force=True)
+                        await page.wait_for_timeout(3000)
+                        
+                        await play_video(page)
+                        await parse_duration_and_wait(topic_text)
+
+        # -------------------------------------------------
+        # FALLBACK: If NO named sections existed, check directly under the module
+        # -------------------------------------------------
         else:
-            print(f"\n   Found {topic_count} topics in Learning Contents. Starting playback loop...")
+            topics = current_mod.locator(".accEach1")
+            topic_count = await topics.count()
             
-            for t in range(topic_count):
-                # Re-query locator to avoid stale elements
-                current_topic = current_mod.locator("div.submod").filter(has_text=re.compile(r"Learning Contents", re.IGNORECASE)).first.locator(".accEach1").nth(t)
-                
-                await current_topic.scroll_into_view_if_needed()
-                
-                topic_text = await current_topic.inner_text()
-                clean_title = topic_text.replace("\n", " - ").strip()
-                print(f"\n📺 Opening Topic {t+1}/{topic_count}: {clean_title}")
-                
-                await current_topic.click(force=True)
-                await page.wait_for_timeout(3000) 
-                
-                await play_video(page)
-                await parse_duration_and_wait(topic_text)
+            if topic_count > 0:
+                print(f"\n   📂 Found {topic_count} videos directly under the module.")
+                for t in range(topic_count):
+                    current_topic = current_mod.locator(".accEach1").nth(t)
+                    
+                    await current_topic.scroll_into_view_if_needed()
+                    topic_text = await current_topic.inner_text()
+                    clean_title = topic_text.replace("\n", " - ").strip()
+                    
+                    print(f"\n      📺 Opening Topic {t+1}/{topic_count}: {clean_title}")
+                    
+                    await current_topic.click(force=True)
+                    await page.wait_for_timeout(3000)
+                    
+                    await play_video(page)
+                    await parse_duration_and_wait(topic_text)
+            else:
+                print("   No video topics found anywhere in this module. Moving to next...")
 
         # Cleanup: Collapse the main module to keep the DOM clean
         main_up_arrow = current_mod.locator("div.accordHeadright").first.locator("img[alt='up-arrow']")

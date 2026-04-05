@@ -30,13 +30,48 @@ async def parse_duration_and_wait(topic_text: str):
     print("✅ Video complete!")
 
 async def play_video(page: Page):
-    """Handles clicking the specific video player overlay."""
-    print("▶️ Attempting to click play button...")
-    play_btn_selector = "#videoContainer0 div.t-cursor-pointer"
+    """Handles clicking the specific video player overlay (Vimeo or YouTube)."""
+    print("▶️ Waiting for video player to initialize...")
+    await page.wait_for_timeout(3000) 
+    
+    container_sel = "#videoContainer0"
     
     try:
-        await page.wait_for_selector(play_btn_selector, timeout=5000)
-        await page.locator(play_btn_selector).first.click(force=True)
-        print("✅ Play button clicked.")
-    except Exception:
-        print("⚠️ Play button not found or already playing.")
+        # Wait for the main video area to appear
+        await page.wait_for_selector(container_sel, timeout=5000)
+        
+        # Force the browser to scroll the video dead-center to avoid viewport errors
+        await page.locator(container_sel).evaluate("el => el.scrollIntoView({behavior: 'smooth', block: 'center'})")
+        await page.wait_for_timeout(1000) 
+        
+        # Check which type of player is loaded
+        yt_wrapper = page.locator(f"{container_sel} .youtube").first
+        overlay = page.locator(f"{container_sel} div.t-cursor-pointer").first
+        
+        if await yt_wrapper.count() > 0:
+            print("🎥 YouTube player detected. Executing double-tap strategy...")
+            
+            # Clicking the center of the container to dismiss the facade
+            await page.locator(container_sel).click(force=True)
+            print("   👆 First click executed (Loading player)...")
+            
+            # Waiting 2 seconds for the iframe to swap in and become interactive
+            await page.wait_for_timeout(2000)
+            
+            # Click the center of the container again to hit the YouTube play button
+            await page.locator(container_sel).click(force=True)
+            print("✅ 👆 Second click executed (Video playing).")
+            
+        elif await overlay.count() > 0:
+            print("🎥 Vimeo player detected.")
+            # Click the center of the container for Vimeo
+            await page.locator(container_sel).click(force=True)
+            print("✅ Vimeo Play button clicked.")
+            
+        else:
+            # Fallback
+            await page.locator(container_sel).click(force=True)
+            print("✅ Clicked main video container.")
+            
+    except Exception as e:
+        print(f"⚠️ Play button interaction failed. Error: {str(e)[:100]}")
