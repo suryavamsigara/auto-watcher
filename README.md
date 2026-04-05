@@ -12,14 +12,14 @@ This tool was built with the intention that it should **only** be used if you al
 ## How to Use
 
 **Step 1: Download**
-Clone this repository or download the ZIP file:
+Open terminal and clone this repository or download the ZIP file (Click 'Code' and 'Download ZIP'):
 ```bash
 git clone [https://github.com/suryavamsigara/auto-watcher.git](https://github.com/suryavamsigara/auto-watcher.git)
 cd auto-watcher
-
+```
 **Step 2: Run the Script**
 
-*   **Windows**: Execute the batch file in your terminal.
+*   **Windows**: Run this
     ```cmd
     .\autowatcher.bat
     ```
@@ -31,7 +31,8 @@ cd auto-watcher
     ```
 
 **Step 3: Wait**
-A browser will open.
-If it asks you to log in, you have 5 minutes to login.
-Once logged in, the terminal will show a list of your courses.
-Type the number of the course you want to complete, hit Enter, and let it do the rest!
+* A browser will open.
+* If it asks you to log in, you have 5 minutes to login.
+* Once logged in, the terminal will show a list of your courses.
+* Type the number of the course you want to complete, hit Enter, and don't touch anything. Let it do the rest!
+* Keep the browser window in full screen.
