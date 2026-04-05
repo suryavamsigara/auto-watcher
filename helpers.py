@@ -2,29 +2,34 @@ import re
 import asyncio
 from playwright.async_api import Page
 
-WAIT_EXTRA_SECONDS = 20 # Add 30 seconds buffer to the video duration
+WAIT_EXTRA_SECONDS = 20
 
 async def parse_duration_and_wait(topic_text: str):
     """Extracts mm:ss from the topic text and waits that duration + 60 seconds."""
     match = re.search(r'(\d{2}):(\d{2})', topic_text)
     if not match:
         print(f"⚠️ Could not find duration in text. Defaulting to 5 minutes.")
-        await asyncio.sleep(300)
-        return
+        wait_time = 300 # 5 minutes default
+    else:
+        minutes = int(match.group(1))
+        seconds = int(match.group(2))
+        total_video_seconds = (minutes * 60) + seconds
+        wait_time = total_video_seconds + WAIT_EXTRA_SECONDS
+        print(f"⏳ Found duration {minutes:02d}:{seconds:02d}. Added buffer.")
 
-    minutes = int(match.group(1))
-    seconds = int(match.group(2))
-    total_video_seconds = (minutes * 60) + seconds
-    
-    wait_time = total_video_seconds + WAIT_EXTRA_SECONDS
-    
-    print(f"⏳ Found duration {minutes:02d}:{seconds:02d}. Waiting {wait_time} seconds (including 1m buffer)...")
-    
-    for remaining in range(wait_time, 0, -10):
-        if remaining % 60 == 0 and remaining != wait_time:
-            print(f"   ... {remaining // 60} minutes remaining")
-        await asyncio.sleep(min(10, remaining))
+    bar_length = 40 
+
+    for remaining in range(wait_time, 0, -1):
+        # Calculate how much of the bar is filled
+        progress = (wait_time - remaining) / wait_time
+        filled_len = int(bar_length * progress)
         
+        bar = '█' * filled_len + '-' * (bar_length - filled_len)
+        
+        print(f'\r   [{bar}] {remaining}s remaining  ', end='', flush=True)
+        
+        await asyncio.sleep(1)
+    print(f'\r   [{"█" * bar_length}] 0s remaining   ')
     print("✅ Video complete!")
 
 async def play_video(page: Page):
