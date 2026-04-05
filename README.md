@@ -1,9 +1,6 @@
-# 🚀 Auto-Watcher
+# Auto-Watcher
 
 A fully automated script built with Python and Playwright to automatically complete video modules on the portal.
-
-## ⚠️ Disclaimer
-This tool was built with the intention that it should **only** be used if you already know the concepts and just don't want to waste time re-watching videos you already understand. If you are new to the material, I highly recommend you actually watch the videos to learn. Users are solely responsible for how they use this tool.
 
 ## Prerequisites
 * [Python 3.8+](https://www.python.org/downloads/) installed on your system.
@@ -14,7 +11,7 @@ This tool was built with the intention that it should **only** be used if you al
 **Step 1: Download**
 Open terminal and clone this repository or download the ZIP file (Click 'Code' and 'Download ZIP'):
 ```bash
-git clone [https://github.com/suryavamsigara/auto-watcher.git](https://github.com/suryavamsigara/auto-watcher.git)
+git clone https://github.com/suryavamsigara/auto-watcher.git
 cd auto-watcher
 ```
 **Step 2: Run the Script**
@@ -30,9 +27,15 @@ cd auto-watcher
     ./autowatcher.sh
     ```
 
+<img width="1467" height="755" alt="image" src="https://github.com/user-attachments/assets/cf09545c-5ff1-478a-85ef-3bb26c9eff88" />
+
+
 **Step 3: Wait**
 * A browser will open.
 * If it asks you to log in, you have 5 minutes to login.
 * Once logged in, the terminal will show a list of your courses.
 * Type the number of the course you want to complete, hit Enter, and don't touch anything. Let it do the rest!
 * Keep the browser window in full screen.
+
+## ⚠️ Disclaimer
+This tool was built with the intention that it should **only** be used if you already know the concepts and just don't want to waste time re-watching videos you already understand. If you are new to the material, I highly recommend you actually watch the videos to learn. Users are solely responsible for how they use this tool.
