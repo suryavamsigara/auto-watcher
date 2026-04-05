@@ -113,7 +113,7 @@ async def main():
         if header_count > 0:
             for h in range(header_count):
                 # Re-query the header to prevent stale element references
-                header = current_mod.locator("div.accordHeadright").filter(has_text=re.compile(r"Learning Content|Reference Video", re.IGNORECASE)).nth(h)
+                header = current_mod.locator("div.accordHeadright").filter(has_text=re.compile(r"Learning Content|Reference Video|Learning Video", re.IGNORECASE)).nth(h)
                 
                 section_title = await header.inner_text()
                 print(f"\n   📂 Processing section: {section_title.strip()}")
