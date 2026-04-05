@@ -2,7 +2,7 @@ import re
 import asyncio
 from playwright.async_api import Page
 
-WAIT_EXTRA_SECONDS = 30 # Add 30 seconds buffer to the video duration
+WAIT_EXTRA_SECONDS = 20 # Add 30 seconds buffer to the video duration
 
 async def parse_duration_and_wait(topic_text: str):
     """Extracts mm:ss from the topic text and waits that duration + 60 seconds."""
@@ -16,9 +16,7 @@ async def parse_duration_and_wait(topic_text: str):
     seconds = int(match.group(2))
     total_video_seconds = (minutes * 60) + seconds
     
-    # wait_time = total_video_seconds + WAIT_EXTRA_SECONDS
-
-    wait_time = 5
+    wait_time = total_video_seconds + WAIT_EXTRA_SECONDS
     
     print(f"⏳ Found duration {minutes:02d}:{seconds:02d}. Waiting {wait_time} seconds (including 1m buffer)...")
     
