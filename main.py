@@ -88,7 +88,27 @@ async def main():
     
     print(f"\n📦 Found {module_count} Modules.")
 
-    for m in range(module_count):
+    module_start = 1
+
+    # Asking the user whether to start from a specif module
+    while True:
+        start_input = input("\nEnter a specific module number to start from (or press Enter to start from 1): ").strip()
+
+        if not start_input:
+            print("\nStarting from the first module...")
+            break
+
+        try:
+            module_start = int(start_input)
+            if 1 <= module_start <= module_count:
+                print(f"Continuing from module: {module_start}")
+                break
+            else:
+                print(f"❌ Please enter a number between 1 and {module_count}.")
+        except ValueError:
+            print("❌ Please enter a valid number")
+
+    for m in range(module_start - 1, module_count):
         current_mod = page.locator("div[aria-labelledby='sidebar-module']").nth(m)
         
         mod_title_el = current_mod.locator("div.t-ml-15").first
@@ -134,6 +154,20 @@ async def main():
                     print(f"      No videos found in {section_title.strip()}.")
                 else:
                     for t in range(topic_count):
+
+                        # Check if the main module collapsed
+                        main_arrow_check = current_mod.locator("div.accordHeadright").first.locator("img[alt='down-arrow']")
+                        if await main_arrow_check.count() > 0:
+                            await main_arrow_check.click(force=True)
+                            await page.wait_for_timeout(1000)
+
+                        # Check if the sub section collapsed
+                        sub_header_check = current_mod.locator("div.accordHeadright").filter(has_text=re.compile(r"Learning Content|Reference Video|Learning Video", re.IGNORECASE)).nth(h)
+                        sub_arrow_check = sub_header_check.locator("img[alt='down-arrow']")
+                        if await sub_arrow_check.count() > 0:
+                            await sub_arrow_check.click(force=True)
+                            await page.wait_for_timeout(1000)
+
                         # Re-query topic dynamically to avoid stale elements
                         current_topic = current_mod.locator("div.accordHeadright").filter(has_text=re.compile(r"Learning Content|Reference Video|Learning Video", re.IGNORECASE)).nth(h).locator("xpath=ancestor::div[contains(@class, 'submod')][1]").locator(".accEach1").nth(t)
                         
