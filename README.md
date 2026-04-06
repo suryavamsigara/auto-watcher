@@ -2,6 +2,9 @@
 
 A fully automated script built with Python and Playwright to automatically complete video modules on the portal.
 
+## ⚠️ Disclaimer
+This tool was built with the intention that it should **only** be used if you already know the concepts and just don't want to waste time re-watching videos you already understand. If you are new to the material, I highly recommend you actually watch the videos to learn. Users are solely responsible for how they use this tool.
+
 ## Prerequisites
 * [Python 3.8+](https://www.python.org/downloads/) installed on your system.
 * Git (optional, for cloning the repository).
@@ -36,6 +39,3 @@ cd auto-watcher
 * Once logged in, the terminal will show a list of your courses.
 * Type the number of the course you want to complete, hit Enter, and don't touch anything. Let it do the rest!
 * Keep the browser window in full screen.
-
-## ⚠️ Disclaimer
-This tool was built with the intention that it should **only** be used if you already know the concepts and just don't want to waste time re-watching videos you already understand. If you are new to the material, I highly recommend you actually watch the videos to learn. Users are solely responsible for how they use this tool.
