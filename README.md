@@ -37,5 +37,9 @@ cd auto-watcher
 * A browser will open.
 * If it asks you to log in, you have 5 minutes to login.
 * Once logged in, the terminal will show a list of your courses.
-* Type the number of the course you want to complete, hit Enter, and don't touch anything. Let it do the rest!
-* Keep the browser window in full screen.
+* Type the number of the course you want to complete, hit Enter.
+* If you want to start from a specific module, enter the module number when it asks or hit enter to start from 1.
+* Don't touch anything. Let it do the rest.
+* You can minimize (-) the browser window. The application runs in the background.
+
+If you found this project helpful, a star would mean a lot.
