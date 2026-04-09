@@ -10,6 +10,7 @@ async def main():
     print("🚀 Starting Auto-Watcher...")
     os.makedirs(BROWSER_PROFILE_DIR, exist_ok=True)
 
+    # Launch persistent chrome browser
     playwright = await async_playwright().start()
     context = await playwright.chromium.launch_persistent_context(
         BROWSER_PROFILE_DIR,
@@ -25,14 +26,13 @@ async def main():
     
     print("🔍 Checking login status...")
     try:
-        # Quick check: If you are already logged in, the courses will load within 5 seconds.
+        # The courses will load within 5 seconds if logged in.
         await page.wait_for_selector("div[aria-labelledby='course-name']", timeout=5000)
         print("✅ Active session found. Proceeding directly to courses...")
         
     except PlaywrightTimeoutError:
         # If it times out, the user is likely on the login screen.
-        print("⚠️ Authentication required. Please log in manually in the browser window.")
-        print("⏳ Script is paused and waiting for you to complete login... (Timeout: 5 minutes)")
+        print("⚠️ Authentication required. Script is paused and waiting for you to complete login... (Timeout: 5 minutes)")
         
         await page.wait_for_url(re.compile(r"dashboard|mycourses", re.IGNORECASE), timeout=300000)
         print("✅ Login successful!")
@@ -47,19 +47,17 @@ async def main():
         
     await page.wait_for_timeout(2000)
 
-    # =================================================
-    # STEP 1: Scrape Courses and Present CLI Menu
-    # =================================================
+    # Scrape Courses and Present CLI Menu
     course_elements = await page.locator("div[aria-labelledby='course-name']").all()
-    print("\n" + "="*40)
+    print("\n" + "="*50)
     print("📚 AVAILABLE COURSES")
-    print("="*40)
+    print("="*50)
     
     for i, el in enumerate(course_elements):
         title = await el.inner_text()
         print(f"[{i + 1}] {title.strip()}")
         
-    print("="*40)
+    print("="*50)
     
     while True:
         try:
@@ -80,9 +78,7 @@ async def main():
     await page.wait_for_selector("div[aria-labelledby='sidebar-module']", timeout=30000)
     await page.wait_for_timeout(4000)
 
-    # =================================================
-    # STEP 2: Iterate Through Modules
-    # =================================================
+    # Iterate Through Modules
     modules = page.locator("div[aria-labelledby='sidebar-module']")
     module_count = await modules.count()
     
@@ -124,9 +120,7 @@ async def main():
             await main_arrow.click(force=True)
             await page.wait_for_timeout(2000)
 
-        # =================================================
-        # STEP 3: Process Video Sections Dynamically
-        # =================================================
+        # Process Video Sections Dynamically
         target_headers = current_mod.locator("div.accordHeadright").filter(has_text=re.compile(r"Learning Content|Reference Video|Learning Video", re.IGNORECASE))
         header_count = await target_headers.count()
 
@@ -142,7 +136,7 @@ async def main():
                 arrow = header.locator("img[alt='down-arrow']")
                 if await arrow.count() > 0:
                     await arrow.click(force=True)
-                    await page.wait_for_timeout(1000)
+                    await page.wait_for_timeout(2000)
                 
                 # Scope strictly to this section's wrapper to avoid clicking hidden videos elsewhere
                 section_wrapper = header.locator("xpath=ancestor::div[contains(@class, 'submod')][1]")
@@ -175,10 +169,10 @@ async def main():
                         topic_text = await current_topic.inner_text()
                         clean_title = topic_text.replace("\n", " - ").strip()
                         
-                        print(f"\n      📺 Opening Topic {t+1}/{topic_count}: {clean_title}")
+                        print(f"\n     📺 Opening Topic {t+1}/{topic_count}: {clean_title}")
                         
                         await current_topic.click(force=True)
-                        await page.wait_for_timeout(3000)
+                        await page.wait_for_timeout(2000)
                         
                         await play_video(page)
                         await parse_duration_and_wait(topic_text)
@@ -202,7 +196,7 @@ async def main():
                     print(f"\n      📺 Opening Topic {t+1}/{topic_count}: {clean_title}")
                     
                     await current_topic.click(force=True)
-                    await page.wait_for_timeout(3000)
+                    await page.wait_for_timeout(2000)
                     
                     await play_video(page)
                     await parse_duration_and_wait(topic_text)
@@ -213,7 +207,7 @@ async def main():
         main_up_arrow = current_mod.locator("div.accordHeadright").first.locator("img[alt='up-arrow']")
         if await main_up_arrow.count() > 0:
             await main_up_arrow.click(force=True)
-            await page.wait_for_timeout(500)
+            await page.wait_for_timeout(2000)
 
     print("\n🎉 You have watched videos in all modules of this course successfully!")
     print("\nRestart the script to complete another course.")

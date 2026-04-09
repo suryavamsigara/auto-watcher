@@ -39,7 +39,7 @@ cd auto-watcher
 * Once logged in, the terminal will show a list of your courses.
 * Type the number of the course you want to complete, hit Enter.
 * If you want to start from a specific module, enter the module number when it asks or hit enter to start from 1.
-* Don't touch anything. Let it do the rest.
+* Let it do the rest.
 * You can minimize (-) the browser window. The application runs in the background.
 
 If you found this project helpful, a star would mean a lot.
