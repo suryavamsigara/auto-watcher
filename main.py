@@ -106,8 +106,14 @@ async def main():
 
     for m in range(module_start - 1, module_count):
         current_mod = page.locator("div[aria-labelledby='sidebar-module']").nth(m)
+
+        await current_mod.scroll_into_view_if_needed()
+        await page.wait_for_timeout(1000)
         
         mod_title_el = current_mod.locator("div.t-ml-15").first
+
+        await mod_title_el.wait_for(state="attached", timeout=10000)
+
         mod_title = await mod_title_el.inner_text()
         
         print(f"\n" + "="*40)
